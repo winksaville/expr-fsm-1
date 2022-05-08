@@ -1,10 +1,14 @@
 use custom_logger::env_logger_init;
 
+trait StateMachine<P> {
+    fn dispatch(&mut self, msg: &P);
+}
+
 pub trait State<P> {
     fn enter(&mut self) {
         log::debug!("State: enter");
     }
-    fn process(&mut self, _m: &P) {
+    fn process(&mut self, _msg: &P) {
         log::debug!("State: process:");
     }
     fn exit(&mut self) {
@@ -23,11 +27,19 @@ struct MySm {
     cur_state: Box<dyn State<Protocol1> + 'static>,
 }
 
+impl StateMachine<Protocol1> for MySm {
+    fn dispatch(&mut self, msg: &Protocol1) {
+        log::debug!("MySm: process+");
+        self.cur_state.process(msg);
+        log::debug!("MySm: process-");
+    }
+}
+
 struct State1;
 
 impl State<Protocol1> for State1 {
-    fn process(&mut self, m: &Protocol1) {
-        match m {
+    fn process(&mut self, msg: &Protocol1) {
+        match msg {
             Protocol1::Msg1 { f1 } => {
                 log::debug!("State1: process m.f1={}", f1);
             }
@@ -48,6 +60,6 @@ fn main() {
         f1: 123,
     };
     mysm.cur_state.enter();
-    mysm.cur_state.process(&msg);
+    mysm.dispatch(&msg);
     mysm.cur_state.exit();
 }
