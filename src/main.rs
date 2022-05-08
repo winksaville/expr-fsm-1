@@ -2,14 +2,14 @@ use custom_logger::env_logger_init;
 
 trait StateMachine<P> {
     //fn cur_state(&mut self) -> Box<&mut (dyn State<Protocol1> + 'static>);
-    fn dispatch(&mut self, msg: &P);
+    fn dispatch(&mut self, msg: &Box<P>);
 }
 
 pub trait State<P> {
     fn enter(&mut self) {
         log::debug!("State: enter");
     }
-    fn process(&mut self, _msg: &P) {
+    fn process(&mut self, _msg: &Box<P>) {
         log::debug!("State: process:");
     }
     fn exit(&mut self) {
@@ -38,7 +38,7 @@ impl StateMachine<Protocol1> for MySm {
     //    &self.cur_state
     //}
 
-    fn dispatch(&mut self, msg: &Protocol1) {
+    fn dispatch(&mut self, msg: &Box<Protocol1>) {
         log::debug!("MySm: process+");
         self.cur_state.process(msg); // Use cur_state directly
         self.cur_state().process(msg); // Use cur_state() to get cur_state indirectly
@@ -49,8 +49,8 @@ impl StateMachine<Protocol1> for MySm {
 struct State1;
 
 impl State<Protocol1> for State1 {
-    fn process(&mut self, msg: &Protocol1) {
-        match msg {
+    fn process(&mut self, msg: &Box<Protocol1>) {
+        match **msg {
             Protocol1::Msg1 { f1 } => {
                 log::debug!("State1: process m.f1={}", f1);
             }
@@ -61,7 +61,8 @@ impl State<Protocol1> for State1 {
 struct State2;
 
 impl State<Protocol1> for State2 {
-    fn process(&mut self, msg: &Protocol1) {
+    fn process(&mut self, msg: &Box<Protocol1>) {
+
         log::debug!("State2: process msg={:?}", msg);
     }
 }
@@ -77,14 +78,14 @@ fn main() {
         cur_state: Box::new(state1),
     };
 
-    let msg = Protocol1::Msg1 { f1: 123 };
+    let msg = Box::new(Protocol1::Msg1 { f1: 123 });
     mysm.cur_state.enter();
     mysm.dispatch(&msg);
     mysm.cur_state.exit();
 
     mysm.cur_state = Box::new(state2);
     mysm.cur_state.enter();
-    let msg2 = Protocol1::Msg1 { f1: 456 };
+    let msg2 = Box::new(Protocol1::Msg1 { f1: 456 });
     mysm.dispatch(&msg2);
     mysm.cur_state.exit();
 }
