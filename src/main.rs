@@ -1,7 +1,7 @@
 use custom_logger::env_logger_init;
 
 trait StateMachine<P> {
-    //fn cur_state(&mut self) -> Box<&mut (dyn State<Protocol1> + 'static>);
+    fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static>;
     fn dispatch(&mut self, msg: &Box<P>);
 }
 
@@ -26,17 +26,11 @@ struct MySm {
     cur_state: Box<dyn State<Protocol1> + 'static>,
 }
 
-impl MySm {
+impl StateMachine<Protocol1> for MySm {
     fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static> {
-        log::debug!("MySm::cur_state():+-");
+        log::debug!("MySm::StateMachine::cur_state():+-");
         &mut self.cur_state
     }
-}
-
-impl StateMachine<Protocol1> for MySm {
-    //fn cur_state(&mut self) -> &Box<dyn State<Protocol1> + 'static> {
-    //    &self.cur_state
-    //}
 
     fn dispatch(&mut self, msg: &Box<Protocol1>) {
         log::debug!("MySm: process+");
