@@ -10,14 +10,15 @@ trait StateMachine<P> {
     }
 }
 
+#[allow(unused)]
 pub trait State<P> {
-    fn enter(&mut self) {
+    fn enter(&mut self, msg: &Box<P>) {
         log::debug!("State: enter");
     }
-    fn process(&mut self, _msg: &Box<P>) {
+    fn process(&mut self, msg: &Box<P>) {
         log::debug!("State: process:");
     }
-    fn exit(&mut self) {
+    fn exit(&mut self, msg: &Box<P>) {
         log::debug!("State: exit");
     }
 }
@@ -25,6 +26,7 @@ pub trait State<P> {
 #[derive(Debug)]
 enum Protocol1 {
     Msg1 { f1: i32 },
+    Msg2 { f1: &'static str },
 }
 
 struct MySm {
@@ -44,7 +46,10 @@ impl State<Protocol1> for State1 {
     fn process(&mut self, msg: &Box<Protocol1>) {
         match **msg {
             Protocol1::Msg1 { f1 } => {
-                log::debug!("State1: process m.f1={}", f1);
+                log::debug!("State1: process Msg1::f1={}", f1);
+            }
+            Protocol1::Msg2 { f1 } => {
+                log::debug!("State1: process Msg2::f1={}", f1);
             }
         }
     }
@@ -54,7 +59,6 @@ struct State2;
 
 impl State<Protocol1> for State2 {
     fn process(&mut self, msg: &Box<Protocol1>) {
-
         log::debug!("State2: process msg={:?}", msg);
     }
 }
@@ -71,13 +75,13 @@ fn main() {
     };
 
     let msg = Box::new(Protocol1::Msg1 { f1: 123 });
-    mysm.cur_state.enter();
+    mysm.cur_state.enter(&msg);
     mysm.dispatch(&msg);
-    mysm.cur_state.exit();
+    mysm.cur_state.exit(&msg);
 
     mysm.cur_state = Box::new(state2);
-    mysm.cur_state.enter();
-    let msg2 = Box::new(Protocol1::Msg1 { f1: 456 });
+    let msg2 = Box::new(Protocol1::Msg2 { f1: "a string" });
+    mysm.cur_state.enter(&msg2);
     mysm.dispatch(&msg2);
-    mysm.cur_state.exit();
+    mysm.cur_state.exit(&msg2);
 }
