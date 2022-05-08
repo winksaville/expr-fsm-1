@@ -1,6 +1,7 @@
 use custom_logger::env_logger_init;
 
 trait StateMachine<P> {
+    //fn cur_state(&mut self) -> Box<&mut (dyn State<Protocol1> + 'static>);
     fn dispatch(&mut self, msg: &P);
 }
 
@@ -18,19 +19,29 @@ pub trait State<P> {
 
 #[derive(Debug)]
 enum Protocol1 {
-    Msg1 {
-        f1: i32,
-    }
+    Msg1 { f1: i32 },
 }
 
 struct MySm {
     cur_state: Box<dyn State<Protocol1> + 'static>,
 }
 
+impl MySm {
+    fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static> {
+        log::debug!("MySm::cur_state():+-");
+        &mut self.cur_state
+    }
+}
+
 impl StateMachine<Protocol1> for MySm {
+    //fn cur_state(&mut self) -> &Box<dyn State<Protocol1> + 'static> {
+    //    &self.cur_state
+    //}
+
     fn dispatch(&mut self, msg: &Protocol1) {
         log::debug!("MySm: process+");
-        self.cur_state.process(msg);
+        self.cur_state.process(msg); // Use cur_state directly
+        self.cur_state().process(msg); // Use cur_state() to get cur_state indirectly
         log::debug!("MySm: process-");
     }
 }
@@ -52,13 +63,12 @@ fn main() {
     log::info!("Hello, world!");
 
     let state1 = State1 {};
+
     let mut mysm = MySm {
         cur_state: Box::new(state1),
     };
 
-    let msg = Protocol1::Msg1 {
-        f1: 123,
-    };
+    let msg = Protocol1::Msg1 { f1: 123 };
     mysm.cur_state.enter();
     mysm.dispatch(&msg);
     mysm.cur_state.exit();
