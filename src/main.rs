@@ -1,8 +1,13 @@
 use custom_logger::env_logger_init;
 
 trait StateMachine<P> {
-    fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static>;
-    fn dispatch(&mut self, msg: &Box<P>);
+    fn cur_state(&mut self) -> &mut Box<dyn State<P> + 'static>;
+
+    fn dispatch(&mut self, msg: &Box<P>) {
+        log::debug!("StateMachine<P>::dispatch:+");
+        self.cur_state().process(msg);
+        log::debug!("StateMachine<P>::dispatch:-");
+    }
 }
 
 pub trait State<P> {
@@ -30,13 +35,6 @@ impl StateMachine<Protocol1> for MySm {
     fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static> {
         log::debug!("MySm::StateMachine::cur_state():+-");
         &mut self.cur_state
-    }
-
-    fn dispatch(&mut self, msg: &Box<Protocol1>) {
-        log::debug!("MySm: process+");
-        self.cur_state.process(msg); // Use cur_state directly
-        self.cur_state().process(msg); // Use cur_state() to get cur_state indirectly
-        log::debug!("MySm: process-");
     }
 }
 
