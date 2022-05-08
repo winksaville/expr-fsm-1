@@ -58,11 +58,20 @@ impl State<Protocol1> for State1 {
     }
 }
 
+struct State2;
+
+impl State<Protocol1> for State2 {
+    fn process(&mut self, msg: &Protocol1) {
+        log::debug!("State2: process msg={:?}", msg);
+    }
+}
+
 fn main() {
     env_logger_init("info");
     log::info!("Hello, world!");
 
     let state1 = State1 {};
+    let state2 = State2 {};
 
     let mut mysm = MySm {
         cur_state: Box::new(state1),
@@ -71,5 +80,11 @@ fn main() {
     let msg = Protocol1::Msg1 { f1: 123 };
     mysm.cur_state.enter();
     mysm.dispatch(&msg);
+    mysm.cur_state.exit();
+
+    mysm.cur_state = Box::new(state2);
+    mysm.cur_state.enter();
+    let msg2 = Protocol1::Msg1 { f1: 456 };
+    mysm.dispatch(&msg2);
     mysm.cur_state.exit();
 }
