@@ -52,8 +52,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "expr-hsm-1"
-version = "0.1.0"
+name = "expr-fsm-1"
+version = "0.2.0"
 dependencies = [
  "custom-logger",
  "log",

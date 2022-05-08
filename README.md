@@ -1,6 +1,6 @@
-# expr-hsm-1
+# expr-fsm-1
 
-A first experiment on creating a Hierarchical State Machine in rust.
+A first experiment on creating a Finite-State Machine in rust.
 
 Searches:
 * [rust hsm hierarchical state machine](https://www.google.com/search?q=rust+hsm+hierarchical+state+machine)
