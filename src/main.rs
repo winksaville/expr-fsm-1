@@ -6,10 +6,16 @@ trait StateMachine<P> {
     fn cur_state(&mut self) -> &mut Box<dyn State<P> + 'static>;
     //fn cur_state(&mut self) -> &mut dyn State<P>;
 
+    fn set_state(&mut self, next_state: Box<dyn State<P> + 'static>);
+
     fn dispatch(&mut self, msg: &P) {
         log::debug!("StateMachine<P>::dispatch:+");
         self.cur_state().process(msg);
         log::debug!("StateMachine<P>::dispatch:-");
+    }
+
+    fn transition_to(&mut self, next_state: Box<dyn State<P> + 'static>) {
+        self.set_state(next_state);
     }
 }
 
@@ -51,6 +57,10 @@ impl StateMachine<Protocol1> for MySm {
     fn cur_state(&mut self) -> &mut Box<dyn State<Protocol1> + 'static> {
         log::debug!("MySm::StateMachine::cur_state():+-");
         &mut self.current_state
+    }
+
+    fn set_state(&mut self, next_state: Box<dyn State<Protocol1> + 'static>) {
+        self.current_state = next_state;
     }
 }
 
@@ -95,7 +105,7 @@ fn main() {
     mysm.current_state.exit(&msg);
 
     // Transition to State2
-    mysm.current_state = Box::new(State2 {});
+    mysm.transition_to(Box::new(State2 {}));
 
     // Allocate a second message on the heap and enter, dispatch msg then exit the state
     let msg2 = Protocol1::Msg2 { f1: "a string" };
