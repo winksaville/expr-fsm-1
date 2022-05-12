@@ -1,33 +1,31 @@
 # expr-fsm-1
 
 A first experiment on creating a Finite-State Machine in rust.
+This time using &dyn State rather than box as in expr-traits.
+But same result:
 
-Searches:
-* [rust hsm hierarchical state machine](https://www.google.com/search?q=rust+hsm+hierarchical+state+machine)
-  * [async-hsm](https://github.com/frehberg/async-hsm)
-    * Not active - 6 commits last 2020-10-15
-    * [Concepts](https://github.com/frehberg/async-hsm#concept) look interesting.
-    * The [example diagram](https://github.com/frehberg/async-hsm#example) looked interesting. Should look into "PlantUml syntax".
-  * [rust-hsm](https://github.com/marjakm/rust-hsm)
-    * Not active - 45 commits last 2015-02-11
+```
+wink@3900x 22-05-12T04:53:12.411Z:~/prgs/rust/myrepos/expr-fsm-1 (dyn-state)
+$ cargo run
+   Compiling expr-fsm-1 v0.2.0 (/home/wink/prgs/rust/myrepos/expr-fsm-1)
+error[E0499]: cannot borrow `*self` as mutable more than once at a time
+  --> src/main.rs:10:20
+   |
+9  |         let cs = self.cur_state();
+   |                  ---------------- first mutable borrow occurs here
+10 |         cs.process(self, msg);
+   |            ------- ^^^^ second mutable borrow occurs here
+   |            |
+   |            first borrow later used by call
 
-* crates-io
-  * #fsm
-  * #statemachine
-  * #state-machine
-    * [rs_state_macine](https://github.com/AdrienHallet/rs_state_machine)
-      * Active - 59 commits, last - 2022-05-05, started 2022-03-23
-  * #state
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `expr-fsm-1` due to previous error
+wink@3900x 22-05-12T04:54:31.572Z:~/prgs/rust/myrepos/expr-fsm-1 (dyn-state)
+```
 
 ## Building and running
 
-```
-wink@3900x 22-05-07T16:29:43.738Z:~/prgs/rust/myrepos/expr-hsm-1 (main)
-$ cargo run
-    Finished dev [unoptimized + debuginfo] target(s) in 0.00s
-     Running `target/debug/expr-hsm-1`
-[2022-05-07T16:29:45.654314623Z INFO  expr_hsm_1    9  1] Hello, world!
-```
+Fails as above :(
 
 ## Test
 
